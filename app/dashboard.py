@@ -116,4 +116,4 @@ st.dataframe(filtered.head(100))
 # Footer
 # -----------------------------
 st.markdown("---")
-st.markdown("Built by Aman | 6th Sem Mini Project")
+st.markdown("Built by Aman Choudhary | 6th Sem Mini Project")
