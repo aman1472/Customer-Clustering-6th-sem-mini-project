@@ -53,7 +53,16 @@ from sklearn.cluster import KMeans
 
 
 # Select numeric columns
-numeric_df = raw_df.select_dtypes(include="number")
+numeric_df = raw_df.select_dtypes(include="number").copy()
+
+# Handle missing values
+numeric_df = numeric_df.fillna(numeric_df.mean())
+
+# Check if data is still sufficient
+if numeric_df.empty:
+    st.error("After cleaning, no valid numeric data is left.")
+    st.stop()
+
 
 if numeric_df.shape[1] < 2:
     st.error("Dataset must contain at least 2 numeric columns.")
