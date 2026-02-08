@@ -98,7 +98,7 @@ df.to_csv(OUTPUT_PATH, index=False)
 
 # -----------------------------
 # Cluster Profiling
-# -----------------------------
+# ----------------------
 
 profile = df.groupby("Cluster").agg({
     "Recency": "mean",
