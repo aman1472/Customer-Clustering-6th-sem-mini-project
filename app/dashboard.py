@@ -154,10 +154,30 @@ st.markdown("AI-Powered Customer Segmentation System")
 # -----------------------------
 col1, col2, col3, col4 = st.columns(4)
 
-col1.metric("Total Customers", df["CustomerID"].nunique())
+col1.metric(
+    "Total Customers",
+    df["CustomerID"].nunique() if "CustomerID" in df.columns else "N/A"
+)
+
 col2.metric("Total Transactions", len(df))
-col3.metric("Total Revenue", f"₹ {df['Monetary'].sum():,.0f}")
+
+
+# Dynamic Revenue Calculation
+if "Monetary" in df.columns:
+    revenue = df["Monetary"].sum()
+elif {"Quantity", "UnitPrice"}.issubset(df.columns):
+    revenue = (df["Quantity"] * df["UnitPrice"]).sum()
+else:
+    revenue = None
+
+col3.metric(
+    "Total Revenue",
+    f"₹ {revenue:,.0f}" if revenue is not None else "N/A"
+)
+
+
 col4.metric("Clusters", df["Cluster"].nunique())
+
 
 
 # -----------------------------
@@ -176,30 +196,39 @@ st.plotly_chart(fig1, use_container_width=True)
 
 
 # -----------------------------
-# RFM Analysis
+# RFM Analysis (Optional)
 # -----------------------------
+
 st.subheader("RFM Analysis")
 
-col1, col2 = st.columns(2)
+rfm_cols = {"Recency", "Frequency", "Monetary"}
 
-with col1:
-    fig2 = px.box(
-        df,
-        x="Cluster",
-        y="Monetary",
-        title="Monetary Value by Cluster"
-    )
-    st.plotly_chart(fig2, use_container_width=True)
+if rfm_cols.issubset(df.columns):
 
-with col2:
-    fig3 = px.scatter(
-        df,
-        x="Recency",
-        y="Frequency",
-        color="Cluster",
-        title="Recency vs Frequency"
-    )
-    st.plotly_chart(fig3, use_container_width=True)
+    col1, col2 = st.columns(2)
+
+    with col1:
+        fig2 = px.box(
+            df,
+            x="Cluster",
+            y="Monetary",
+            title="Monetary Value by Cluster"
+        )
+        st.plotly_chart(fig2, use_container_width=True)
+
+    with col2:
+        fig3 = px.scatter(
+            df,
+            x="Recency",
+            y="Frequency",
+            color="Cluster",
+            title="Recency vs Frequency"
+        )
+        st.plotly_chart(fig3, use_container_width=True)
+
+else:
+    st.info("RFM analysis not available for this dataset.")
+
 
 
 # -----------------------------
