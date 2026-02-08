@@ -10,23 +10,89 @@ st.set_page_config(
     layout="wide"
 )
 
+# -----------------------------
+# Upload Dataset
+# -----------------------------
 
-# Base directory
-BASE_DIR = Path(__file__).resolve().parent.parent
+st.sidebar.header("Upload Dataset")
 
-DATA_PATH = BASE_DIR / "data" / "processed" / "customer_clusters.csv"
-PROFILE_PATH = BASE_DIR / "data" / "processed" / "cluster_profile.csv"
+uploaded_file = st.sidebar.file_uploader(
+    "Upload CSV or Excel file",
+    type=["csv", "xlsx"]
+)
+
+if uploaded_file is None:
+    st.warning("Please upload a dataset to continue.")
+    st.stop()
 
 
-# Load data
+# -----------------------------
+# Load Uploaded Data
+# -----------------------------
+
 @st.cache_data
-def load_data():
-    df = pd.read_csv(DATA_PATH)
-    profile = pd.read_csv(PROFILE_PATH)
-    return df, profile
+def load_uploaded_data(file):
+
+    if file.name.endswith(".csv"):
+        df = pd.read_csv(file)
+    else:
+        df = pd.read_excel(file)
+
+    return df
 
 
-df, profile = load_data()
+raw_df = load_uploaded_data(uploaded_file)
+
+
+# -----------------------------
+# Preprocessing + Clustering
+# -----------------------------
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+
+
+# Select numeric columns
+numeric_df = raw_df.select_dtypes(include="number")
+
+if numeric_df.shape[1] < 2:
+    st.error("Dataset must contain at least 2 numeric columns.")
+    st.stop()
+
+
+# Scaling
+scaler = StandardScaler()
+scaled_data = scaler.fit_transform(numeric_df)
+
+
+# Select K
+st.sidebar.header("Clustering Settings")
+
+k = st.sidebar.slider(
+    "Number of Clusters (K)",
+    min_value=2,
+    max_value=10,
+    value=3
+)
+
+
+# Train model
+model = KMeans(n_clusters=k, random_state=42)
+labels = model.fit_predict(scaled_data)
+
+
+# Add cluster column
+df = raw_df.copy()
+df["Cluster"] = labels
+
+
+# -----------------------------
+# Cluster Profile
+# -----------------------------
+
+profile = df.groupby("Cluster").mean().reset_index()
+
+
 
 
 # -----------------------------

@@ -10,3 +10,4 @@ df = pd.read_excel(DATA_PATH)
 
 print(df.head(5))
 print("Dataset Shape : " ,df.shape)
+
