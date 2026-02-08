@@ -52,11 +52,28 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 
 
+import numpy as np
+
 # Select numeric columns
 numeric_df = raw_df.select_dtypes(include="number").copy()
 
-# Handle missing values
+# Replace infinite values
+numeric_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+# Remove columns with zero variance
+numeric_df = numeric_df.loc[:, numeric_df.std() != 0]
+
+# Fill missing values
 numeric_df = numeric_df.fillna(numeric_df.mean())
+
+# Final validation
+if numeric_df.isnull().sum().sum() > 0:
+    st.error("Dataset contains invalid values after cleaning.")
+    st.stop()
+
+if numeric_df.shape[0] < 2:
+    st.error("Not enough valid rows for clustering.")
+    st.stop()
 
 # Check if data is still sufficient
 if numeric_df.empty:
@@ -69,6 +86,17 @@ if numeric_df.shape[1] < 2:
     st.stop()
 
 
+
+# ✅ INSERT DEBUG CODE HERE (RIGHT HERE)
+st.write("Numeric DF Info:")
+st.write(numeric_df.describe())
+
+st.write("Null Count:")
+st.write(numeric_df.isnull().sum())
+
+st.write("Any Inf:", np.isinf(numeric_df.values).any())
+
+
 # Scaling
 scaler = StandardScaler()
 scaled_data = scaler.fit_transform(numeric_df)
@@ -77,10 +105,12 @@ scaled_data = scaler.fit_transform(numeric_df)
 # Select K
 st.sidebar.header("Clustering Settings")
 
+max_k = min(10, len(numeric_df))
+
 k = st.sidebar.slider(
     "Number of Clusters (K)",
     min_value=2,
-    max_value=10,
+    max_value=max_k,
     value=3
 )
 
