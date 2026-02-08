@@ -57,6 +57,12 @@ import numpy as np
 # Select numeric columns
 numeric_df = raw_df.select_dtypes(include="number").copy()
 
+# Remove ID columns
+for col in numeric_df.columns:
+    if "id" in col.lower():
+        numeric_df.drop(col, axis=1, inplace=True)
+
+
 # Replace infinite values
 numeric_df.replace([np.inf, -np.inf], np.nan, inplace=True)
 
@@ -121,15 +127,17 @@ labels = model.fit_predict(scaled_data)
 
 
 # Add cluster column
-df = raw_df.copy()
+df = raw_df.loc[numeric_df.index].copy()
 df["Cluster"] = labels
+
 
 
 # -----------------------------
 # Cluster Profile
 # -----------------------------
 
-profile = df.groupby("Cluster").mean().reset_index()
+profile = df.groupby("Cluster").mean(numeric_only=True).reset_index()
+
 
 
 
