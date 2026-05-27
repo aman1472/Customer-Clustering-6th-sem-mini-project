@@ -73,3 +73,29 @@ Customer-Segmentation-System/
 
 ## 👨‍💻 Developer
 - Aman
+
+
+##📸 Screenshots
+
+### Dashboard
+![Dashboard](Screenshots/Dashboard.png)
+
+---
+
+### Customer Segmentation Graph
+![Segmentation](Screenshots/01.png)
+
+---
+
+### Cluster Visualization
+![Clusters](Screenshots/02.png)
+
+---
+
+### Customer Distribution
+![Distribution](Screenshots/03.png)
+
+---
+
+### Analysis Output
+![Analysis](Screenshots/04.png)
